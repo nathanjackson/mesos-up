@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  zk:
+    image: netflixoss/exhibitor:1.5.2
+    ports:
+      - "8080:8080"
+
+  master:
+    image: mesosphere/mesos-master:1.3.0
+    environment:
+      MESOS_PORT: 5050
+      MESOS_ZK: zk://zk:2181/mesos
+    ports:
+      - "5050:5050"
+
+  slave:
+    image: mesosphere/mesos-slave:1.3.0
+    privileged: true
+    environment:
+      MESOS_PORT: 5051
+      MESOS_MASTER: zk://zk:2181/mesos
+      MESOS_CONTAINERIZERS: mesos
+      MESOS_LOG_DIR: /var/log/mesos
+      MESOS_WORK_DIR: /var/tmp/mesos
+    volumes:
+      - /cgroup:/cgroup
